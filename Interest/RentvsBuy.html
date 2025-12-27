@@ -7,113 +7,20 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-:root{
-  --bg:#f5f7fb;
-  --card:#ffffff;
-  --accent:#2563eb;
-  --muted:#6b7280;
-  --radius:14px;
-  --shadow:0 10px 30px rgba(0,0,0,.08);
-}
-
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Inter,system-ui,Arial;
-  background:var(--bg);
-  color:#111;
-}
-
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
-}
-
-h1{
-  text-align:center;
-  color:var(--accent);
-  margin-bottom:20px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-  align-items:stretch;
-}
-
-.card{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-}
-
-label{
-  font-size:13px;
-  color:var(--muted);
-}
-
-input,select,button{
-  width:100%;
-  padding:10px;
-  margin:6px 0 14px;
-  border-radius:10px;
-  border:1px solid #e5e7eb;
-  font-size:15px;
-}
-
-button{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  cursor:pointer;
-}
-
-button.secondary{
-  background:#eef2ff;
-  color:#111;
-}
-
-.section-title{
-  font-weight:700;
-  margin:10px 0;
-}
-
-.results{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-}
-
-.result-box{
-  background:#f8fafc;
-  border-radius:12px;
-  padding:14px;
-  text-align:center;
-}
-
-.result-box h3{
-  margin:0;
-  color:var(--accent);
-}
-
-.result-box span{
-  font-size:13px;
-  color:var(--muted);
-}
-
-canvas{
-  margin-top:20px;
-  max-height:260px;
-}
-
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr}
-}
+body{margin:0;font-family:Inter,Arial;background:#f5f7fb}
+.container{max-width:1200px;margin:auto;padding:20px}
+h1{text-align:center;color:#2563eb}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:20px}
+label{font-size:13px;color:#555}
+input,select,button{width:100%;padding:10px;margin:6px 0 14px;border-radius:10px;border:1px solid #ddd}
+button{background:#2563eb;color:#fff;border:none}
+.secondary{background:#eef2ff;color:#111}
+.results{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.result{background:#f8fafc;border-radius:12px;padding:14px;text-align:center}
+.result h3{margin:0;color:#2563eb}
+canvas{margin-top:20px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -122,15 +29,14 @@ canvas{
 <h1>Rent vs Buy Calculator</h1>
 
 <div class="grid">
-
-<!-- LEFT INPUT -->
 <div class="card">
-<div class="section-title">Rent Details</div>
+
 <label>Monthly Rent</label><input id="rent" value="1800">
 <label>Annual Rent Increase (%)</label><input id="rentInc" value="3">
 <label>Years Renting</label><input id="years" value="10">
 
-<div class="section-title">Buy Details</div>
+<hr>
+
 <label>Home Price</label><input id="price" value="350000">
 <label>Down Payment</label><input id="down" value="70000">
 <label>Mortgage Rate (%)</label><input id="rate" value="6.5">
@@ -141,10 +47,7 @@ canvas{
 <label>Home Appreciation (%)</label><input id="app" value="3">
 <label>Closing Costs</label><input id="close" value="8000">
 
-<label>
-<input type="checkbox" id="deduct" checked>
- Apply US Mortgage Tax Deduction
-</label>
+<label><input type="checkbox" id="deduct" checked> Apply US Mortgage Tax Deduction</label>
 <label>Marginal Tax Rate (%)</label><input id="taxRate" value="24">
 
 <label>Currency</label>
@@ -154,118 +57,99 @@ canvas{
 <option value="£">£ GBP</option>
 </select>
 
-<button onclick="calc()">Compare Rent vs Buy</button>
+<button onclick="calculate()">Compare Rent vs Buy</button>
 <button class="secondary" onclick="location.reload()">Clear</button>
+
 </div>
 
-<!-- RIGHT OUTPUT -->
 <div class="card">
 <div class="results">
-<div class="result-box"><h3 id="rentCost">$0</h3><span>Total Rent</span></div>
-<div class="result-box"><h3 id="buyCost">$0</h3><span>Total Buy</span></div>
-<div class="result-box"><h3 id="diff">$0</h3><span>Difference</span></div>
-<div class="result-box"><h3 id="break">–</h3><span>Break-Even</span></div>
+<div class="result"><h3 id="rentCost">$0</h3><span>Total Rent</span></div>
+<div class="result"><h3 id="buyCost">$0</h3><span>Total Buy</span></div>
+<div class="result"><h3 id="diff">$0</h3><span>Difference</span></div>
+<div class="result"><h3 id="breakEven">–</h3><span>Break-Even</span></div>
 
-<div class="result-box"><h3 id="equity">$0</h3><span>Equity Built</span></div>
-<div class="result-box"><h3 id="value">$0</h3><span>Home Value</span></div>
-<div class="result-box"><h3 id="net">$0</h3><span>Net Wealth</span></div>
-<div class="result-box"><h3 id="irr">–</h3><span>IRR</span></div>
+<div class="result"><h3 id="equity">$0</h3><span>Equity Built</span></div>
+<div class="result"><h3 id="homeValue">$0</h3><span>Home Value</span></div>
+<div class="result"><h3 id="netWorth">$0</h3><span>Net Wealth</span></div>
+<div class="result"><h3 id="irr">$0</h3><span>IRR</span></div>
 </div>
 
 <canvas id="chart"></canvas>
-
 <button class="secondary" onclick="window.print()">Print Report</button>
 </div>
-
 </div>
 </div>
 
 <script>
-function f(n){return cur.value+Number(n).toLocaleString(undefined,{maximumFractionDigits:0})}
-
-function calc(){
-const y=+years.value;
-const rent0=+rent.value;
-const rInc=+rentInc.value/100;
-
-let rentTotal=0;
-let yearlyRent=[];
-for(let i=0;i<y;i++){
- let r=rent0*Math.pow(1+rInc,i)*12;
- rentTotal+=r;
- yearlyRent.push(rentTotal);
+function f(v){
+ return document.getElementById("cur").value +
+ Math.round(v).toLocaleString();
 }
 
-const loan=price.value-down.value;
-const r=rate.value/100/12;
-const n=term.value*12;
-const emi=loan*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+function calculate(){
+ const years = +yearsEl();
+ function yearsEl(){return document.getElementById("years").value}
 
-let bal=loan;
-let interestPaid=0;
-for(let m=1;m<=y*12;m++){
- let int=bal*r;
- interestPaid+=int;
- bal-=emi-int;
-}
+ const rent = +rentEl();
+ function rentEl(){return document.getElementById("rent").value}
 
-const maintCost=price.value*(maint.value/100)*y;
-const baseBuy=emi*12*y + tax.value*y + ins.value*y + maintCost + +close.value;
+ const inc = +rentInc.value/100;
 
-let taxSave=0;
-if(deduct.checked){
- taxSave=(interestPaid+tax.value*y)*(taxRate.value/100);
-}
+ let rentTotal=0;
+ let rentArr=[];
+ for(let i=0;i<years;i++){
+  rentTotal+=rent*Math.pow(1+inc,i)*12;
+  rentArr.push(rentTotal);
+ }
 
-const buyTotal=baseBuy-taxSave;
-const homeVal=price.value*Math.pow(1+app.value/100,y);
-const equity=homeVal-bal;
-const netWealth=equity-buyTotal;
+ const loan = price.value - down.value;
+ const r = rate.value/100/12;
+ const n = term.value*12;
+ const emi = loan*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
 
-rentCost.innerText=f(rentTotal);
-buyCost.innerText=f(buyTotal);
-diff.innerText=f(rentTotal-buyTotal);
-equityEl.innerText=f(equity);
-value.innerText=f(homeVal);
-net.innerText=f(netWealth);
+ let bal=loan, interest=0;
+ for(let i=0;i<years*12;i++){
+  let int=bal*r;
+  interest+=int;
+  bal-=emi-int;
+ }
 
-let be="Never";
-for(let i=0;i<y;i++){
- if(yearlyRent[i]>=buyTotal){be="Year "+(i+1);break;}
-}
-break.innerText=be;
+ const maintCost = price.value*(maint.value/100)*years;
+ let buyTotal = emi*12*years + tax.value*years + ins.value*years + maintCost + +close.value;
 
-// IRR
-let cf=[-(down.value+close.value)];
-for(let i=1;i<y;i++)cf.push(-baseBuy/y);
-cf.push(homeVal);
+ if(deduct.checked){
+  buyTotal -= (interest + tax.value*years)*(taxRate.value/100);
+ }
 
-function irr(cf){
- let r=0.1;
- for(let i=0;i<1000;i++){
-  let npv=0,d=0;
-  for(let t=0;t<cf.length;t++){
-   npv+=cf[t]/Math.pow(1+r,t);
-   d-=t*cf[t]/Math.pow(1+r,t+1);
+ const homeVal = price.value*Math.pow(1+app.value/100,years);
+ const equity = homeVal - bal;
+ const net = equity - buyTotal;
+
+ rentCost.innerText=f(rentTotal);
+ buyCost.innerText=f(buyTotal);
+ diff.innerText=f(rentTotal-buyTotal);
+ equity.innerText=f(equity);
+ homeValue.innerText=f(homeVal);
+ netWorth.innerText=f(net);
+
+ let be="Never";
+ for(let i=0;i<years;i++){
+  if(rentArr[i]>=buyTotal){be="Year "+(i+1);break}
+ }
+ breakEven.innerText=be;
+
+ if(window.c)window.c.destroy();
+ window.c=new Chart(chart,{
+  type:"line",
+  data:{
+   labels:rentArr.map((_,i)=>"Year "+(i+1)),
+   datasets:[
+    {label:"Rent Cost",data:rentArr,borderColor:"#ef4444"},
+    {label:"Buy Cost",data:Array(years).fill(buyTotal),borderColor:"#2563eb"}
+   ]
   }
-  r-=npv/d;
- }
- return r;
-}
-irrEl.innerText=(irr(cf)*100).toFixed(2)+"%";
-
-// Chart
-if(window.c)window.c.destroy();
-window.c=new Chart(chart,{
- type:"line",
- data:{
-  labels:Array.from({length:y},(_,i)=>"Year "+(i+1)),
-  datasets:[
-   {label:"Rent Cost",data:yearlyRent,borderColor:"#ef4444"},
-   {label:"Buy Cost",data:Array(y).fill(buyTotal),borderColor:"#2563eb"}
-  ]
- }
-});
+ });
 }
 </script>
 </body>
