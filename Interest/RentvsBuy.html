@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rent vs Buy Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --bg:#f6f9fc;
+  --card:#ffffff;
+  --primary:#2563eb;
+  --success:#16a34a;
+  --danger:#dc2626;
+  --text:#0f172a;
+  --border:#e5e7eb;
+  --radius:14px;
+  --shadow:0 12px 32px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+h1{
+  text-align:center;
+  color:var(--primary);
+  margin-bottom:20px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+}
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:22px;
+}
+label{
+  font-size:14px;
+  display:block;
+  margin-top:12px;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:15px;
+}
+button{
+  width:100%;
+  margin-top:16px;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:var(--primary);
+  color:#fff;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+}
+button.secondary{
+  background:#eef2ff;
+  color:var(--primary);
+}
+.results{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+@media(max-width:700px){
+  .results{grid-template-columns:repeat(2,1fr)}
+}
+.box{
+  background:#f8fafc;
+  border-radius:12px;
+  padding:14px;
+  text-align:center;
+}
+.box h2{
+  margin:0;
+  font-size:20px;
+}
+.box p{
+  margin:4px 0 0;
+  font-size:13px;
+  color:#475569;
+}
+.recommend{
+  margin-top:16px;
+  padding:14px;
+  border-radius:12px;
+  font-weight:600;
+  text-align:center;
+}
+.good{background:#dcfce7;color:#166534}
+.bad{background:#fee2e2;color:#991b1b}
+.chart-wrap{
+  margin-top:20px;
+}
+.print{
+  margin-top:16px;
+  background:#f1f5f9;
+  color:#0f172a;
+}
+@media print{
+  button{display:none}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>Rent vs Buy Calculator</h1>
+
+<div class="grid">
+<!-- INPUTS -->
+<div class="card">
+<h3>Rent Details</h3>
+<label>Monthly Rent</label>
+<input id="rent" value="1800">
+<label>Annual Rent Increase (%)</label>
+<input id="rentInc" value="3">
+<label>Years Renting</label>
+<input id="years" value="10">
+
+<h3 style="margin-top:18px">Buy Details</h3>
+<label>Home Price</label>
+<input id="price" value="350000">
+<label>Down Payment</label>
+<input id="down" value="70000">
+<label>Mortgage Rate (%)</label>
+<input id="rate" value="6.5">
+<label>Loan Term (Years)</label>
+<input id="term" value="30">
+<label>Property Tax (Annual)</label>
+<input id="tax" value="4200">
+<label>Insurance (Annual)</label>
+<input id="ins" value="1200">
+<label>Maintenance (% of price)</label>
+<input id="maint" value="1">
+<label>Home Appreciation (%)</label>
+<input id="app" value="3">
+<label>Closing Costs</label>
+<input id="close" value="8000">
+
+<label>Currency</label>
+<select id="cur">
+<option value="$">$ USD</option>
+<option value="€">€ EUR</option>
+<option value="£">£ GBP</option>
+<option value="₹">₹ INR</option>
+</select>
+
+<button onclick="calc()">Compare Rent vs Buy</button>
+<button class="secondary" onclick="clearAll()">Clear</button>
+</div>
+
+<!-- RESULTS -->
+<div class="card">
+<div class="results">
+<div class="box"><h2 id="rentCost">–</h2><p>Total Rent Cost</p></div>
+<div class="box"><h2 id="buyCost">–</h2><p>Total Buy Cost</p></div>
+<div class="box"><h2 id="diff">–</h2><p>Difference</p></div>
+<div class="box"><h2 id="breakeven">–</h2><p>Break-Even Year</p></div>
+</div>
+
+<div id="rec" class="recommend"></div>
+
+<div class="chart-wrap">
+<canvas id="chart"></canvas>
+</div>
+
+<button class="print" onclick="window.print()">Print Report</button>
+</div>
+</div>
+</div>
+
+<script>
+let chart;
+
+function calc(){
+const rent = +rent.value;
+const rentInc = +rentInc.value/100;
+const years = +years.value;
+const price = +price.value;
+const down = +down.value;
+const rate = +rate.value/100/12;
+const term = +term.value*12;
+const tax = +tax.value;
+const ins = +ins.value;
+const maint = +maint.value/100;
+const app = +app.value/100;
+const close = +close.value;
+const cur = document.getElementById("cur").value;
+
+let rentTotal=0;
+let r=rent;
+let rentArr=[], buyArr=[];
+let buyTotal=down+close;
+let loan = price-down;
+
+let emi = loan*rate*Math.pow(1+rate,term)/(Math.pow(1+rate,term)-1);
+let bal=loan;
+
+for(let y=1;y<=years;y++){
+rentTotal+=r*12;
+rentArr.push(rentTotal);
+r*=1+rentInc;
+
+for(let m=0;m<12;m++){
+let interest=bal*rate;
+bal+=interest-emi;
+}
+buyTotal+=emi*12 + tax + ins + price*maint;
+let homeVal=price*Math.pow(1+app,y);
+buyArr.push(buyTotal - homeVal);
+}
+
+rentCost.innerText=cur+rentTotal.toFixed(0);
+buyCost.innerText=cur+buyTotal.toFixed(0);
+diff.innerText=cur+Math.abs(rentTotal-buyTotal).toFixed(0);
+
+let be="Never";
+for(let i=0;i<years;i++){
+if(buyArr[i]<rentArr[i]){be=i+1;break;}
+}
+breakeven.innerText=be;
+
+rec.className="recommend "+(buyTotal<rentTotal?"good":"bad");
+rec.innerText=buyTotal<rentTotal
+?"Buying is financially better in your case."
+:"Renting is financially better in your case.";
+
+if(chart)chart.destroy();
+chart=new Chart(document.getElementById("chart"),{
+type:"line",
+data:{
+labels:[...Array(years).keys()].map(i=>"Year "+(i+1)),
+datasets:[
+{label:"Rent Cost",data:rentArr,borderColor:"#dc2626"},
+{label:"Buy Net Cost",data:buyArr,borderColor:"#16a34a"}
+]
+}
+});
+}
+
+function clearAll(){
+document.querySelectorAll("input").forEach(i=>i.value="");
+}
+</script>
+</body>
+</html>
