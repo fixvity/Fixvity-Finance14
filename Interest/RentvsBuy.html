@@ -5,23 +5,83 @@
 <title>Rent vs Buy Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{margin:0;font-family:Inter,Arial;background:#f5f7fb}
-.container{max-width:1200px;margin:auto;padding:20px}
-h1{text-align:center;color:#2563eb;margin-bottom:20px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-label{display:block;margin-top:14px;font-size:14px}
-input{width:100%;padding:12px;margin-top:6px;border-radius:10px;border:1px solid #ddd}
-button{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer}
-.primary{background:#2563eb;color:#fff;margin-top:20px}
-.secondary{background:#eef2ff;margin-top:10px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.stat{background:#f8fafc;border-radius:12px;padding:14px;text-align:center}
-.stat b{font-size:18px;color:#2563eb}
-.center{text-align:center}
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  background:#f5f7fb;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+h1{
+  text-align:center;
+  color:#2563eb;
+  margin-bottom:20px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+label{
+  display:block;
+  margin-top:14px;
+  font-size:14px;
+}
+input{
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+.primary{
+  background:#2563eb;
+  color:#fff;
+  margin-top:20px;
+}
+.secondary{
+  background:#eef2ff;
+  margin-top:10px;
+}
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:20px;
+}
+.result-box{
+  background:#f8fafc;
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+.result-box b{
+  font-size:18px;
+  color:#2563eb;
+}
+.center{
+  text-align:center;
+}
 @media(max-width:900px){
-.grid{grid-template-columns:1fr}
-.stats{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr}
+  .result-grid{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -32,37 +92,71 @@ button{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;cur
 
 <div class="grid">
 
-<!-- INPUT PANEL -->
+<!-- INPUT -->
 <div class="card">
 <h3>Rent Details</h3>
-<label>Monthly Rent</label><input id="rent" value="1800">
-<label>Annual Rent Increase (%)</label><input id="rentInc" value="3">
-<label>Years Renting</label><input id="years" value="10">
+<label>Monthly Rent</label>
+<input id="rent" value="1800">
+
+<label>Annual Rent Increase (%)</label>
+<input id="rentInc" value="3">
+
+<label>Years Renting</label>
+<input id="years" value="10">
 
 <hr>
 
 <h3>Buy Details</h3>
-<label>Home Price</label><input id="price" value="350000">
-<label>Down Payment</label><input id="down" value="70000">
-<label>Mortgage Rate (%)</label><input id="rate" value="6.5">
-<label>Loan Term (Years)</label><input id="term" value="30">
-<label>Property Tax (Annual)</label><input id="tax" value="4200">
-<label>Insurance (Annual)</label><input id="ins" value="1200">
-<label>Maintenance (% of Price)</label><input id="maint" value="1">
-<label>Home Appreciation (%)</label><input id="app" value="3">
-<label>Closing Costs</label><input id="close" value="8000">
+<label>Home Price</label>
+<input id="price" value="350000">
+
+<label>Down Payment</label>
+<input id="down" value="70000">
+
+<label>Mortgage Rate (%)</label>
+<input id="rate" value="6.5">
+
+<label>Loan Term (Years)</label>
+<input id="term" value="30">
+
+<label>Property Tax (Annual)</label>
+<input id="tax" value="4200">
+
+<label>Insurance (Annual)</label>
+<input id="ins" value="1200">
+
+<label>Maintenance (% of Price)</label>
+<input id="maint" value="1">
+
+<label>Home Appreciation (%)</label>
+<input id="app" value="3">
+
+<label>Closing Costs</label>
+<input id="close" value="8000">
 
 <button class="primary" onclick="calculate()">Compare Rent vs Buy</button>
 <button class="secondary" onclick="location.reload()">Clear</button>
 </div>
 
-<!-- RESULT PANEL -->
+<!-- RESULTS -->
 <div class="card">
-<div class="stats">
-<div class="stat"><b id="rentTotal">—</b><div>Total Rent Cost</div></div>
-<div class="stat"><b id="buyTotal">—</b><div>Total Buy Cost</div></div>
-<div class="stat"><b id="difference">—</b><div>Difference</div></div>
-<div class="stat"><b id="breakEven">—</b><div>Break-Even Year</div></div>
+<div class="result-grid">
+  <div class="result-box">
+    <b id="rentTotal">—</b>
+    <div>Total Rent Cost</div>
+  </div>
+  <div class="result-box">
+    <b id="buyTotal">—</b>
+    <div>Total Buy Cost</div>
+  </div>
+  <div class="result-box">
+    <b id="difference">—</b>
+    <div>Difference</div>
+  </div>
+  <div class="result-box">
+    <b id="breakEven">—</b>
+    <div>Break-Even Year</div>
+  </div>
 </div>
 
 <button class="secondary center" onclick="window.print()">Print Report</button>
@@ -73,57 +167,78 @@ button{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;cur
 
 <script>
 function calculate(){
-const rent = +document.getElementById("rent").value;
-const rentInc = +document.getElementById("rentInc").value / 100;
-const years = +document.getElementById("years").value;
 
-const price = +document.getElementById("price").value;
-const down = +document.getElementById("down").value;
-const rate = +document.getElementById("rate").value / 100 / 12;
-const term = +document.getElementById("term").value * 12;
-const tax = +document.getElementById("tax").value;
-const ins = +document.getElementById("ins").value;
-const maint = (+document.getElementById("maint").value / 100) * price;
-const app = +document.getElementById("app").value / 100;
-const close = +document.getElementById("close").value;
+  const rent = +document.getElementById("rent").value;
+  const rentInc = +document.getElementById("rentInc").value / 100;
+  const years = +document.getElementById("years").value;
 
-// RENT CALC
-let totalRent = 0;
-let currentRent = rent;
-for(let y=1;y<=years;y++){
-  totalRent += currentRent * 12;
-  currentRent *= (1 + rentInc);
-}
+  const price = +document.getElementById("price").value;
+  const down = +document.getElementById("down").value;
+  const annualRate = +document.getElementById("rate").value / 100;
+  const monthlyRate = annualRate / 12;
+  const termYears = +document.getElementById("term").value;
+  const termMonths = termYears * 12;
 
-// BUY CALC
-const loan = price - down;
-const emi = loan * rate * Math.pow(1+rate,term) / (Math.pow(1+rate,term)-1);
-let buyCost = emi * 12 * years + (tax + ins + maint) * years + close;
+  const tax = +document.getElementById("tax").value;
+  const ins = +document.getElementById("ins").value;
+  const maint = (+document.getElementById("maint").value / 100) * price;
+  const app = +document.getElementById("app").value / 100;
+  const close = +document.getElementById("close").value;
 
-// Appreciation benefit
-const futureValue = price * Math.pow(1+app, years);
-buyCost -= futureValue;
-
-// BREAK EVEN
-let cumRent = 0, cumBuy = close;
-let breakEven = "Never";
-currentRent = rent;
-
-for(let y=1;y<=years;y++){
-  cumRent += currentRent * 12;
-  cumBuy += emi * 12 + tax + ins + maint;
-  if(cumBuy < cumRent){
-    breakEven = y;
-    break;
+  /* RENT COST */
+  let totalRent = 0;
+  let currentRent = rent;
+  for(let y=1;y<=years;y++){
+    totalRent += currentRent * 12;
+    currentRent *= (1 + rentInc);
   }
-  currentRent *= (1 + rentInc);
-}
 
-// OUTPUT
-document.getElementById("rentTotal").innerText = "$" + Math.round(totalRent).toLocaleString();
-document.getElementById("buyTotal").innerText = "$" + Math.round(buyCost).toLocaleString();
-document.getElementById("difference").innerText = "$" + Math.round(totalRent - buyCost).toLocaleString();
-document.getElementById("breakEven").innerText = breakEven;
+  /* BUY COST */
+  const loan = price - down;
+  const emi = loan * monthlyRate * Math.pow(1+monthlyRate,termMonths) /
+              (Math.pow(1+monthlyRate,termMonths)-1);
+
+  let buyCost = down + close;
+  buyCost += emi * 12 * years;
+  buyCost += (tax + ins + maint) * years;
+
+  /* EQUITY GAIN (CORRECT METHOD) */
+  const remainingLoan =
+    loan * Math.pow(1 + monthlyRate, termMonths - years * 12);
+
+  const futureValue =
+    price * Math.pow(1 + app, years);
+
+  const equityGain = Math.max(0, futureValue - remainingLoan);
+  buyCost -= equityGain;
+
+  /* BREAK EVEN */
+  let cumRent = 0;
+  let cumBuy = down + close;
+  let breakEven = "Never";
+  currentRent = rent;
+
+  for(let y=1;y<=years;y++){
+    cumRent += currentRent * 12;
+    cumBuy += emi * 12 + tax + ins + maint;
+    if(cumBuy < cumRent){
+      breakEven = y;
+      break;
+    }
+    currentRent *= (1 + rentInc);
+  }
+
+  /* OUTPUT */
+  document.getElementById("rentTotal").innerText =
+    "$" + Math.round(totalRent).toLocaleString();
+
+  document.getElementById("buyTotal").innerText =
+    "$" + Math.round(buyCost).toLocaleString();
+
+  document.getElementById("difference").innerText =
+    "$" + Math.round(totalRent - buyCost).toLocaleString();
+
+  document.getElementById("breakEven").innerText = breakEven;
 }
 </script>
 
