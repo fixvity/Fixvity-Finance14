@@ -9,198 +9,165 @@
 
 <style>
 :root{
-  --bg:#f5f8fc;
+  --bg:#f5f7fb;
   --card:#ffffff;
-  --primary:#2563eb;
+  --accent:#2f6ce5;
   --muted:#6b7280;
   --radius:14px;
   --shadow:0 10px 30px rgba(0,0,0,.08);
 }
-
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:var(--bg);
   font-family:Inter,system-ui,Arial;
+  background:var(--bg);
   color:#111;
 }
-
+h1{
+  text-align:center;
+  color:var(--accent);
+  margin:24px 0;
+}
 .container{
   max-width:1200px;
   margin:auto;
   padding:16px;
 }
-
-h1{
-  text-align:center;
-  color:var(--primary);
-  margin-bottom:18px;
-}
-
 .grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:380px 1fr;
   gap:20px;
 }
-
 .card{
   background:var(--card);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
-  padding:16px;
+  padding:18px;
 }
-
 label{
   font-size:13px;
   color:var(--muted);
-  margin-top:10px;
-  display:block;
 }
-
 input,select{
   width:100%;
   padding:10px;
-  margin-top:4px;
-  border-radius:10px;
   border:1px solid #e5e7eb;
+  border-radius:10px;
+  margin-bottom:12px;
   font-size:14px;
 }
-
 button{
   width:100%;
   padding:12px;
-  border-radius:12px;
   border:none;
-  font-weight:700;
+  border-radius:12px;
+  font-size:15px;
   cursor:pointer;
 }
-
-.btn-primary{
-  background:var(--primary);
-  color:white;
-  margin-top:14px;
-}
-
-.btn-clear{
-  background:#eef2ff;
-  color:#1e3a8a;
-  margin-top:8px;
-}
-
-.stats{
+.primary{background:var(--accent);color:#fff}
+.secondary{background:#eef2ff;color:#333;margin-top:8px}
+.results{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:12px;
 }
-
-.stat{
+.result-box{
   background:#f8fafc;
   border-radius:12px;
-  padding:12px;
+  padding:14px;
   text-align:center;
 }
-
-.stat h3{
-  margin:0;
-  color:var(--primary);
+.result-box b{
   font-size:18px;
+  color:var(--accent);
 }
-
-.stat p{
-  margin:4px 0 0;
-  font-size:12px;
-  color:var(--muted);
-}
-
-canvas{
-  margin-top:18px;
-  height:260px!important;
-}
-
+canvas{margin-top:20px}
 @media(max-width:900px){
   .grid{grid-template-columns:1fr}
-  .stats{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
 
 <body>
-<div class="container">
+
 <h1>Rent vs Buy Calculator</h1>
 
+<div class="container">
 <div class="grid">
 
-<!-- INPUT -->
+<!-- INPUTS -->
 <div class="card">
-<h3>Rent Details</h3>
+
+<b>Rent Details</b><br><br>
 
 <label>Monthly Rent</label>
-<input id="rent" type="number" value="1800">
+<input id="rent" value="1800">
 
 <label>Annual Rent Increase (%)</label>
-<input id="rentInc" type="number" value="3">
+<input id="rentInc" value="3">
 
 <label>Years Renting</label>
-<input id="years" type="number" value="10">
+<input id="years" value="10">
 
 <hr>
 
-<h3>Buy Details</h3>
+<b>Buy Details</b><br><br>
 
 <label>Home Price</label>
-<input id="price" type="number" value="350000">
+<input id="price" value="350000">
 
 <label>Down Payment</label>
-<input id="down" type="number" value="70000">
+<input id="down" value="70000">
 
 <label>Mortgage Rate (%)</label>
-<input id="rate" type="number" value="6.5">
+<input id="rate" value="6.5">
 
 <label>Loan Term (Years)</label>
-<input id="term" type="number" value="30">
+<input id="term" value="30">
 
 <label>Property Tax (Annual)</label>
-<input id="tax" type="number" value="4200">
+<input id="tax" value="4200">
 
 <label>Insurance (Annual)</label>
-<input id="ins" type="number" value="1200">
+<input id="ins" value="1200">
 
 <label>Maintenance (% of price)</label>
-<input id="maint" type="number" value="1">
+<input id="maint" value="1">
 
 <label>Home Appreciation (%)</label>
-<input id="app" type="number" value="3">
+<input id="app" value="3">
 
 <label>Closing Costs</label>
-<input id="close" type="number" value="8000">
+<input id="close" value="8000">
 
 <label>Currency</label>
-<select id="currency">
+<select id="cur">
   <option value="$">$ USD</option>
   <option value="€">€ EUR</option>
   <option value="£">£ GBP</option>
 </select>
 
-<button class="btn-primary" onclick="calculate()">Compare Rent vs Buy</button>
-<button class="btn-clear" onclick="location.reload()">Clear</button>
+<button class="primary" onclick="calculate()">Compare Rent vs Buy</button>
+<button class="secondary" onclick="location.reload()">Clear</button>
+
 </div>
 
-<!-- OUTPUT -->
+<!-- RESULTS -->
 <div class="card">
 
-<div class="stats">
-  <div class="stat"><h3 id="rentTotal">$0</h3><p>Total Rent</p></div>
-  <div class="stat"><h3 id="buyTotal">$0</h3><p>Total Buy</p></div>
-  <div class="stat"><h3 id="diff">$0</h3><p>Difference</p></div>
-  <div class="stat"><h3 id="break">–</h3><p>Break-Even</p></div>
+<div class="results">
+  <div class="result-box"><b id="rRent">$0</b><div>Total Rent</div></div>
+  <div class="result-box"><b id="rBuy">$0</b><div>Total Buy</div></div>
+  <div class="result-box"><b id="rDiff">$0</b><div>Difference</div></div>
+  <div class="result-box"><b id="rBE">–</b><div>Break-Even</div></div>
 
-  <div class="stat"><h3 id="equity">$0</h3><p>Equity</p></div>
-  <div class="stat"><h3 id="homeVal">$0</h3><p>Home Value</p></div>
-  <div class="stat"><h3 id="net">$0</h3><p>Net Wealth</p></div>
-  <div class="stat"><h3 id="roi">0%</h3><p>ROI</p></div>
+  <div class="result-box"><b id="rEq">$0</b><div>Equity</div></div>
+  <div class="result-box"><b id="rVal">$0</b><div>Home Value</div></div>
+  <div class="result-box"><b id="rNW">$0</b><div>Net Wealth</div></div>
+  <div class="result-box"><b id="rROI">0%</b><div>ROI</div></div>
 </div>
 
-<canvas id="chart"></canvas>
+<canvas id="chart" height="260"></canvas>
 
 </div>
 </div>
@@ -209,81 +176,80 @@ canvas{
 <script>
 let chart;
 
-function fmt(v,c){return c+v.toLocaleString(undefined,{maximumFractionDigits:0});}
-
 function calculate(){
-  const rent=+document.getElementById('rent').value;
-  const rentInc=+document.getElementById('rentInc').value/100;
-  const years=+document.getElementById('years').value;
-  const price=+document.getElementById('price').value;
-  const down=+document.getElementById('down').value;
-  const rate=+document.getElementById('rate').value/100/12;
-  const term=+document.getElementById('term').value*12;
-  const tax=+document.getElementById('tax').value;
-  const ins=+document.getElementById('ins').value;
-  const maint=+document.getElementById('maint').value/100;
-  const app=+document.getElementById('app').value/100;
-  const close=+document.getElementById('close').value;
-  const cur=document.getElementById('currency').value;
+const $ = id => +document.getElementById(id).value;
+const cur = document.getElementById("cur").value;
 
-  // RENT
-  let rentTotal=0;
-  let rentArr=[];
-  let r=rent*12;
-  for(let y=1;y<=years;y++){
-    rentTotal+=r;
-    rentArr.push(rentTotal);
-    r*=1+rentInc;
-  }
+const rent0 = $("rent");
+const rentInc = $("rentInc")/100;
+const years = $("years");
 
-  // BUY
-  const loan=price-down;
-  const emi=(loan*rate*Math.pow(1+rate,term))/(Math.pow(1+rate,term)-1);
-  let buyTotal=close;
-  let bal=loan;
-  let buyArr=[];
-  for(let y=1;y<=years;y++){
-    for(let m=0;m<12;m++){
-      const i=bal*rate;
-      bal-=emi-i;
-      buyTotal+=emi;
-    }
-    buyTotal+=tax+ins+(price*maint);
+const price = $("price");
+const down = $("down");
+const rate = $("rate")/100/12;
+const term = $("term")*12;
+const tax = $("tax");
+const ins = $("ins");
+const maint = $("maint")/100*price;
+const app = $("app")/100;
+const close = $("close");
+
+let rentTotal=0;
+let rentYear=rent0;
+let rentArr=[], buyArr=[];
+
+for(let y=1;y<=years;y++){
+  rentTotal+=rentYear*12;
+  rentArr.push(rentTotal);
+  rentYear*=1+rentInc;
+}
+
+const loan = price-down;
+const mPay = loan*(rate*Math.pow(1+rate,term))/(Math.pow(1+rate,term)-1);
+
+let balance=loan;
+let buyTotal=down+close;
+let principalPaid=0;
+
+for(let m=1;m<=years*12;m++){
+  const interest=balance*rate;
+  const principal=mPay-interest;
+  balance-=principal;
+  principalPaid+=principal;
+  buyTotal+=mPay;
+  if(m%12===0){
+    buyTotal+=tax+ins+maint;
     buyArr.push(buyTotal);
   }
+}
 
-  const homeVal=price*Math.pow(1+app,years);
-  const equity=homeVal-bal;
-  const net=equity-buyTotal;
-  const roi=(net/(down+close))*100;
+const homeValue = price*Math.pow(1+app,years);
+const equity = homeValue-balance;
+const netWealth = equity-buyTotal;
+const roi = ((equity-down)/down)*100;
 
-  document.getElementById('rentTotal').innerText=fmt(rentTotal,cur);
-  document.getElementById('buyTotal').innerText=fmt(buyTotal,cur);
-  document.getElementById('diff').innerText=fmt(rentTotal-buyTotal,cur);
-  document.getElementById('equity').innerText=fmt(equity,cur);
-  document.getElementById('homeVal').innerText=fmt(homeVal,cur);
-  document.getElementById('net').innerText=fmt(net,cur);
-  document.getElementById('roi').innerText=isFinite(roi)?roi.toFixed(1)+'%':'0%';
+document.getElementById("rRent").innerText=cur+rentTotal.toFixed(0);
+document.getElementById("rBuy").innerText=cur+buyTotal.toFixed(0);
+document.getElementById("rDiff").innerText=cur+(rentTotal-buyTotal).toFixed(0);
+document.getElementById("rEq").innerText=cur+equity.toFixed(0);
+document.getElementById("rVal").innerText=cur+homeValue.toFixed(0);
+document.getElementById("rNW").innerText=cur+netWealth.toFixed(0);
+document.getElementById("rROI").innerText=roi.toFixed(1)+"%";
+document.getElementById("rBE").innerText=rentTotal>buyTotal?"Year "+years:"Never";
 
-  let br='Never';
-  for(let i=0;i<years;i++){
-    if(buyArr[i]<=rentArr[i]){br='Year '+(i+1);break;}
+if(chart) chart.destroy();
+chart=new Chart(document.getElementById("chart"),{
+  type:"line",
+  data:{
+    labels:[...Array(years)].map((_,i)=>"Year "+(i+1)),
+    datasets:[
+      {label:"Rent Cost",data:rentArr,borderColor:"#dc2626",fill:false},
+      {label:"Buy Cost",data:buyArr,borderColor:"#2563eb",fill:false}
+    ]
   }
-  document.getElementById('break').innerText=br;
-
-  if(chart)chart.destroy();
-  chart=new Chart(document.getElementById('chart'),{
-    type:'line',
-    data:{
-      labels:rentArr.map((_,i)=>'Year '+(i+1)),
-      datasets:[
-        {label:'Rent Cost',data:rentArr,borderColor:'#ef4444',fill:false},
-        {label:'Buy Cost',data:buyArr,borderColor:'#2563eb',fill:false}
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false}
-  });
+});
 }
 </script>
+
 </body>
 </html>
