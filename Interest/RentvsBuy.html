@@ -15,55 +15,101 @@
   --radius:14px;
   --shadow:0 10px 30px rgba(0,0,0,.08);
 }
+
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family:Inter,system-ui,Arial;
   background:var(--bg);
+  color:#111;
 }
-.container{max-width:1200px;margin:auto;padding:20px}
-h1{text-align:center;color:var(--accent)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  color:var(--accent);
+  margin-bottom:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
 .card{
   background:var(--card);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:20px;
 }
-label{font-size:13px;color:var(--muted)}
+
+label{
+  font-size:13px;
+  color:var(--muted);
+}
+
 input,select,button{
   width:100%;
   padding:10px;
   margin:6px 0 14px;
   border-radius:10px;
   border:1px solid #e5e7eb;
+  font-size:15px;
 }
+
 button{
   background:var(--accent);
-  color:white;
+  color:#fff;
   border:none;
   cursor:pointer;
 }
+
 button.secondary{
   background:#eef2ff;
   color:#111;
 }
+
+.section-title{
+  font-weight:700;
+  margin:10px 0;
+}
+
 .results{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:12px;
 }
+
 .result-box{
   background:#f8fafc;
   border-radius:12px;
   padding:14px;
   text-align:center;
 }
-.result-box h3{margin:0;color:var(--accent)}
-canvas{margin-top:20px;height:260px!important}
+
+.result-box h3{
+  margin:0;
+  color:var(--accent);
+}
+
+.result-box span{
+  font-size:13px;
+  color:var(--muted);
+}
+
+canvas{
+  margin-top:20px;
+  height:280px !important;
+}
+
 @media(max-width:900px){
   .grid{grid-template-columns:1fr}
-  .results{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -76,12 +122,12 @@ canvas{margin-top:20px;height:260px!important}
 
 <!-- INPUT -->
 <div class="card">
+<div class="section-title">Rent Details</div>
 <label>Monthly Rent</label><input id="rent" value="1800">
 <label>Annual Rent Increase (%)</label><input id="rentInc" value="3">
 <label>Years Renting</label><input id="years" value="10">
 
-<hr>
-
+<div class="section-title">Buy Details</div>
 <label>Home Price</label><input id="price" value="350000">
 <label>Down Payment</label><input id="down" value="70000">
 <label>Mortgage Rate (%)</label><input id="rate" value="6.5">
@@ -92,7 +138,10 @@ canvas{margin-top:20px;height:260px!important}
 <label>Home Appreciation (%)</label><input id="app" value="3">
 <label>Closing Costs</label><input id="close" value="8000">
 
-<label><input type="checkbox" id="deduct" checked> Apply US Mortgage Tax Deduction</label>
+<label>
+<input type="checkbox" id="deduct" checked>
+ Apply US Mortgage Tax Deduction
+</label>
 <label>Marginal Tax Rate (%)</label><input id="taxRate" value="24">
 
 <label>Currency</label>
@@ -102,25 +151,26 @@ canvas{margin-top:20px;height:260px!important}
 <option value="£">£ GBP</option>
 </select>
 
-<button onclick="calc()">Compare Rent vs Buy</button>
+<button onclick="calculate()">Compare Rent vs Buy</button>
 <button class="secondary" onclick="location.reload()">Clear</button>
 </div>
 
 <!-- OUTPUT -->
 <div class="card">
 <div class="results">
-<div class="result-box"><h3 id="rentCost">$0</h3>Total Rent</div>
-<div class="result-box"><h3 id="buyCost">$0</h3>Total Buy</div>
-<div class="result-box"><h3 id="diff">$0</h3>Difference</div>
-<div class="result-box"><h3 id="breakEven">–</h3>Break-Even</div>
+<div class="result-box"><h3 id="oRent">$0</h3><span>Total Rent</span></div>
+<div class="result-box"><h3 id="oBuy">$0</h3><span>Total Buy</span></div>
+<div class="result-box"><h3 id="oDiff">$0</h3><span>Difference</span></div>
+<div class="result-box"><h3 id="oBE">–</h3><span>Break-Even</span></div>
 
-<div class="result-box"><h3 id="equity">$0</h3>Equity</div>
-<div class="result-box"><h3 id="value">$0</h3>Home Value</div>
-<div class="result-box"><h3 id="net">$0</h3>Net Wealth</div>
-<div class="result-box"><h3 id="irr">–</h3>IRR</div>
+<div class="result-box"><h3 id="oEq">$0</h3><span>Equity</span></div>
+<div class="result-box"><h3 id="oVal">$0</h3><span>Home Value</span></div>
+<div class="result-box"><h3 id="oNet">$0</h3><span>Net Wealth</span></div>
+<div class="result-box"><h3 id="oIRR">–</h3><span>IRR</span></div>
 </div>
 
 <canvas id="chart"></canvas>
+<button class="secondary" onclick="window.print()">Print Report</button>
 </div>
 
 </div>
@@ -133,96 +183,127 @@ function fmt(n){
   return cur.value + Math.round(n).toLocaleString();
 }
 
-function calc(){
-const y = +years.value;
-const rent0 = +rent.value;
-const rInc = +rentInc.value/100;
+function calculate(){
 
-let rentTotal=0;
-let rentArr=[];
+const Y = Number(years.value);
+const rent0 = Number(rent.value);
+const rentInc = Number(rentInc.value)/100;
 
-for(let i=0;i<y;i++){
-  rentTotal += rent0*Math.pow(1+rInc,i)*12;
+const priceV = Number(price.value);
+const downV = Number(down.value);
+const rateV = Number(rate.value)/100;
+const termV = Number(term.value);
+const taxV = Number(tax.value);
+const insV = Number(ins.value);
+const maintV = Number(maint.value)/100;
+const appV = Number(app.value)/100;
+const closeV = Number(close.value);
+const taxRateV = Number(taxRate.value)/100;
+
+/* RENT */
+let rentTotal = 0;
+let rentArr = [];
+for(let y=1;y<=Y;y++){
+  rentTotal += rent0*Math.pow(1+rentInc,y-1)*12;
   rentArr.push(rentTotal);
 }
 
-const loan0 = price.value - down.value;
-const r = rate.value/100/12;
-const n = term.value*12;
+/* MORTGAGE */
+const loan0 = priceV - downV;
+const r = rateV/12;
+const n = termV*12;
 const emi = loan0 * r / (1 - Math.pow(1+r,-n));
 
 let loan = loan0;
-let interestPaid=0;
-let buyTotal = +down.value + +close.value;
-let buyArr=[];
+let buyTotal = downV + closeV;
+let buyArr = [];
+let interestPaid = 0;
 
-for(let yr=1;yr<=y;yr++){
-  let yearlyInt=0;
-  for(let m=0;m<12;m++){
-    let int = loan*r;
-    yearlyInt += int;
-    loan -= (emi - int);
+for(let y=1;y<=Y;y++){
+  let yearlyInterest = 0;
+
+  for(let m=1;m<=12;m++){
+    if(loan <= 0) break;
+    let interest = loan*r;
+    let principal = Math.min(emi-interest,loan);
+    loan -= principal;
+    yearlyInterest += interest;
   }
-  interestPaid += yearlyInt;
 
-  let yearlyCost = emi*12 + +tax.value + +ins.value + price.value*(maint.value/100);
-  buyTotal += yearlyCost;
+  interestPaid += yearlyInterest;
+
+  buyTotal += emi*12 + taxV + insV + priceV*maintV;
   buyArr.push(buyTotal);
 }
 
-let taxSave = deduct.checked ? (interestPaid + tax.value*y)*(taxRate.value/100) : 0;
-buyTotal -= taxSave;
-
-const homeVal = price.value*Math.pow(1+app.value/100,y);
-const equityVal = homeVal - loan;
-const netWealth = equityVal - buyTotal;
-
-rentCost.innerText = fmt(rentTotal);
-buyCost.innerText = fmt(buyTotal);
-diff.innerText = fmt(rentTotal - buyTotal);
-equity.innerText = fmt(equityVal);
-value.innerText = fmt(homeVal);
-net.innerText = fmt(netWealth);
-
-breakEven.innerText = "Never";
-for(let i=0;i<y;i++){
-  if(rentArr[i]>=buyArr[i]){breakEven.innerText="Year "+(i+1);break;}
+/* TAX */
+if(deduct.checked){
+  buyTotal -= (interestPaid + taxV*Y) * taxRateV;
 }
 
-// IRR
-let cf=[-(+down.value + +close.value)];
-for(let i=0;i<y-1;i++) cf.push(-(buyArr[i]- (buyArr[i-1]||0)));
-cf.push(homeVal - loan);
+/* HOME */
+const homeVal = priceV*Math.pow(1+appV,Y);
+const equity = homeVal - Math.max(loan,0);
+const net = equity - buyTotal;
 
-function IRR(cf){
- let r=0.1;
- for(let i=0;i<500;i++){
-  let npv=0,d=0;
-  for(let t=0;t<cf.length;t++){
-    npv+=cf[t]/Math.pow(1+r,t);
-    d-=t*cf[t]/Math.pow(1+r,t+1);
+/* OUTPUT */
+oRent.innerText = fmt(rentTotal);
+oBuy.innerText = fmt(buyTotal);
+oDiff.innerText = fmt(rentTotal-buyTotal);
+oEq.innerText = fmt(equity);
+oVal.innerText = fmt(homeVal);
+oNet.innerText = fmt(net);
+
+/* BREAK EVEN */
+oBE.innerText="Never";
+for(let i=0;i<Y;i++){
+  if(rentArr[i]>=buyArr[i]){
+    oBE.innerText="Year "+(i+1);
+    break;
   }
-  r-=npv/d;
- }
- return r;
 }
-irr.innerText = (IRR(cf)*100).toFixed(1)+"%";
 
-// Chart
+/* IRR */
+function irr(cf){
+  let r=0.1;
+  for(let i=0;i<400;i++){
+    let npv=0,dnpv=0;
+    for(let t=0;t<cf.length;t++){
+      npv+=cf[t]/Math.pow(1+r,t);
+      dnpv-=t*cf[t]/Math.pow(1+r,t+1);
+    }
+    r-=npv/dnpv;
+  }
+  return r;
+}
+
+let cf=[-(downV+closeV)];
+for(let i=0;i<buyArr.length;i++){
+  cf.push(-(buyArr[i]-(buyArr[i-1]||0)));
+}
+cf.push(homeVal);
+
+oIRR.innerText=(irr(cf)*100).toFixed(2)+"%";
+
+/* CHART */
 if(chart) chart.destroy();
-const ctx=document.getElementById("chart").getContext("2d");
-chart=new Chart(ctx,{
- type:"line",
- data:{
-  labels:rentArr.map((_,i)=>"Year "+(i+1)),
-  datasets:[
-   {label:"Rent Cost",data:rentArr,borderColor:"#ef4444"},
-   {label:"Buy Cost",data:buyArr,borderColor:"#2563eb"}
-  ]
- },
- options:{responsive:true,maintainAspectRatio:false}
+chart=new Chart(chartCanvas,{
+  type:"line",
+  data:{
+    labels:rentArr.map((_,i)=>"Year "+(i+1)),
+    datasets:[
+      {label:"Rent Cost",data:rentArr,borderColor:"#ef4444",fill:false},
+      {label:"Buy Cost",data:buyArr,borderColor:"#2563eb",fill:false}
+    ]
+  },
+  options:{
+    responsive:true,
+    maintainAspectRatio:false
+  }
 });
 }
+
+const chartCanvas=document.getElementById("chart");
 </script>
 </body>
 </html>
