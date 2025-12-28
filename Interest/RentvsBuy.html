@@ -51,6 +51,7 @@ input,select{
   margin:6px 0 14px;
   border-radius:10px;
   border:1px solid #e5e7eb;
+  font-size:15px;
 }
 .results{
   display:grid;
@@ -68,7 +69,7 @@ input,select{
   color:var(--accent);
 }
 canvas{
-  height:280px !important;
+  height:300px !important;
   margin-top:20px;
 }
 @media(max-width:900px){
@@ -85,43 +86,44 @@ canvas{
 
 <!-- INPUT -->
 <div class="card">
+
 <label>Monthly Rent</label>
-<input id="rent" value="1800">
+<input id="rent" type="number" value="1800">
 
 <label>Annual Rent Increase (%)</label>
-<input id="rentInc" value="3">
+<input id="rentInc" type="number" value="3">
 
 <label>Years</label>
-<input id="years" value="10">
+<input id="years" type="number" value="10">
 
 <hr>
 
 <label>Home Price</label>
-<input id="price" value="350000">
+<input id="price" type="number" value="350000">
 
 <label>Down Payment</label>
-<input id="down" value="70000">
+<input id="down" type="number" value="70000">
 
 <label>Mortgage Rate (%)</label>
-<input id="rate" value="6.5">
+<input id="rate" type="number" value="6.5">
 
 <label>Loan Term (Years)</label>
-<input id="term" value="30">
+<input id="term" type="number" value="30">
 
 <label>Property Tax (Annual)</label>
-<input id="tax" value="4200">
+<input id="tax" type="number" value="4200">
 
 <label>Insurance (Annual)</label>
-<input id="ins" value="1200">
+<input id="ins" type="number" value="1200">
 
 <label>Maintenance (% of price)</label>
-<input id="maint" value="1">
+<input id="maint" type="number" value="1">
 
 <label>Home Appreciation (%)</label>
-<input id="app" value="3">
+<input id="app" type="number" value="3">
 
 <label>Closing Costs</label>
-<input id="close" value="8000">
+<input id="close" type="number" value="8000">
 
 <label>Currency</label>
 <select id="cur">
@@ -129,10 +131,12 @@ canvas{
   <option value="€">€ EUR</option>
   <option value="£">£ GBP</option>
 </select>
+
 </div>
 
 <!-- OUTPUT -->
 <div class="card">
+
 <div class="results">
   <div class="result"><h3 id="oRent"></h3><small>Total Rent</small></div>
   <div class="result"><h3 id="oBuy"></h3><small>Total Buy</small></div>
@@ -145,6 +149,7 @@ canvas{
 </div>
 
 <canvas id="chart"></canvas>
+
 </div>
 
 </div>
@@ -158,72 +163,74 @@ function money(v){
 }
 
 function calculate(){
-  const Y=+years.value;
-  const rent0=+rent.value;
-  const rentInc=+rentInc.value/100;
 
-  const priceV=+price.value;
-  const downV=+down.value;
-  const rateV=+rate.value/100/12;
-  const termV=+term.value*12;
-  const taxV=+tax.value;
-  const insV=+ins.value;
-  const maintV=+maint.value/100;
-  const appV=+app.value/100;
-  const closeV=+close.value;
+  const Y = +years.value;
+  const rentM = +rent.value;
+  const rentInc = +rentInc.value/100;
+
+  const priceV = +price.value;
+  const downV = +down.value;
+  const rateV = +rate.value/100/12;
+  const termV = +term.value*12;
+  const taxV = +tax.value;
+  const insV = +ins.value;
+  const maintV = +maint.value/100;
+  const appV = +app.value/100;
+  const closeV = +close.value;
 
   /* RENT */
-  let rentTotal=0;
-  let rentArr=[];
+  let rentTotal = 0;
+  let rentArr = [];
   for(let i=0;i<Y;i++){
-    rentTotal+=rent0*Math.pow(1+rentInc,i)*12;
+    rentTotal += rentM * Math.pow(1+rentInc,i) * 12;
     rentArr.push(rentTotal);
   }
 
   /* BUY */
-  const loan0=priceV-downV;
-  const emi=loan0*rateV/(1-Math.pow(1+rateV,-termV));
-  let loan=loan0;
-  let buyTotal=downV+closeV;
-  let buyArr=[];
+  const loanStart = priceV - downV;
+  const emi = loanStart * rateV / (1 - Math.pow(1+rateV,-termV));
+
+  let loan = loanStart;
+  let buyTotal = downV + closeV;
+  let buyArr = [];
 
   for(let y=0;y<Y;y++){
     for(let m=0;m<12;m++){
-      let interest=loan*rateV;
-      let principal=emi-interest;
-      loan=Math.max(loan-principal,0);
+      let interest = loan * rateV;
+      let principal = emi - interest;
+      loan = Math.max(loan - principal, 0);
     }
-    buyTotal+=emi*12+taxV+insV+priceV*maintV;
+    buyTotal += emi*12 + taxV + insV + priceV*maintV;
     buyArr.push(buyTotal);
   }
 
-  const homeVal=priceV*Math.pow(1+appV,Y);
-  const equity=homeVal-loan;
-  const net=equity-buyTotal;
+  const homeValue = priceV * Math.pow(1+appV,Y);
+  const equity = homeValue - loan;
+  const net = equity - buyTotal;
 
-  oRent.innerText=money(rentTotal);
-  oBuy.innerText=money(buyTotal);
-  oDiff.innerText=money(rentTotal-buyTotal);
-  oEq.innerText=money(equity);
-  oVal.innerText=money(homeVal);
-  oNet.innerText=money(net);
+  oRent.innerText = money(rentTotal);
+  oBuy.innerText = money(buyTotal);
+  oDiff.innerText = money(rentTotal - buyTotal);
+  oEq.innerText = money(equity);
+  oVal.innerText = money(homeValue);
+  oNet.innerText = money(net);
 
-  oBE.innerText="Never";
+  oBE.innerText = "Never";
   for(let i=0;i<Y;i++){
-    if(rentArr[i]>=buyArr[i]){
-      oBE.innerText="Year "+(i+1);
+    if(rentArr[i] >= buyArr[i]){
+      oBE.innerText = "Year " + (i+1);
       break;
     }
   }
 
   if(chart) chart.destroy();
-  chart=new Chart(document.getElementById("chart"),{
+  chart = new Chart(document.getElementById("chart"),{
     type:"line",
     data:{
-      labels:rentArr.map((_,i)=>"Year "+(i+1)),
+      labels: rentArr.map((_,i)=>"Year "+(i+1)),
       datasets:[
-        {label:"Rent Cost",data:rentArr,borderColor:"#ef4444"},
-        {label:"Buy Cost",data:buyArr,borderColor:"#2563eb"}
+        {label:"Rent Cost", data:rentArr, borderColor:"#ef4444", fill:false},
+        {label:"Buy Cost", data:buyArr, borderColor:"#2563eb", fill:false}
       ]
     },
     options:{
@@ -233,11 +240,10 @@ function calculate(){
   });
 }
 
-/* AUTO CALCULATE */
+/* AUTO-RUN */
 document.querySelectorAll("input,select").forEach(el=>{
   el.addEventListener("input",calculate);
 });
-
 calculate();
 </script>
 </body>
