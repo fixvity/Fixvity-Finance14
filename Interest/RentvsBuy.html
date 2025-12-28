@@ -2,104 +2,91 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rent vs Buy Calculator</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-:root{
-  --bg:#f5f7fb;
-  --card:#ffffff;
-  --accent:#2f6ce5;
-  --muted:#6b7280;
-  --radius:14px;
-  --shadow:0 10px 30px rgba(0,0,0,.08);
-}
-*{box-sizing:border-box}
 body{
   margin:0;
   font-family:Inter,system-ui,Arial;
-  background:var(--bg);
-  color:#111;
-}
-h1{
-  text-align:center;
-  color:var(--accent);
-  margin:24px 0;
+  background:#f4f7fb;
 }
 .container{
   max-width:1200px;
   margin:auto;
-  padding:16px;
+  padding:20px;
+}
+h1{
+  text-align:center;
+  color:#2563eb;
 }
 .grid{
   display:grid;
-  grid-template-columns:380px 1fr;
+  grid-template-columns: 380px 1fr;
   gap:20px;
 }
 .card{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:18px;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  padding:20px;
 }
 label{
   font-size:13px;
-  color:var(--muted);
+  color:#555;
 }
 input,select{
   width:100%;
   padding:10px;
-  border:1px solid #e5e7eb;
-  border-radius:10px;
-  margin-bottom:12px;
-  font-size:14px;
+  margin:6px 0 14px;
+  border-radius:8px;
+  border:1px solid #ddd;
 }
 button{
   width:100%;
   padding:12px;
   border:none;
-  border-radius:12px;
+  border-radius:10px;
+  background:#2563eb;
+  color:white;
   font-size:15px;
   cursor:pointer;
 }
-.primary{background:var(--accent);color:#fff}
-.secondary{background:#eef2ff;color:#333;margin-top:8px}
 .results{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns: repeat(4,1fr);
   gap:12px;
 }
-.result-box{
+.stat{
   background:#f8fafc;
-  border-radius:12px;
-  padding:14px;
+  padding:12px;
+  border-radius:10px;
   text-align:center;
 }
-.result-box b{
-  font-size:18px;
-  color:var(--accent);
+.stat b{
+  color:#2563eb;
 }
-canvas{margin-top:20px}
+canvas{
+  margin-top:20px;
+  height:300px !important;
+}
 @media(max-width:900px){
-  .grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr;}
+  .results{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
 
 <body>
-
+<div class="container">
 <h1>Rent vs Buy Calculator</h1>
 
-<div class="container">
 <div class="grid">
 
-<!-- INPUTS -->
+<!-- INPUT -->
 <div class="card">
-
-<b>Rent Details</b><br><br>
-
+<h3>Rent Details</h3>
 <label>Monthly Rent</label>
 <input id="rent" value="1800">
 
@@ -111,8 +98,7 @@ canvas{margin-top:20px}
 
 <hr>
 
-<b>Buy Details</b><br><br>
-
+<h3>Buy Details</h3>
 <label>Home Price</label>
 <input id="price" value="350000">
 
@@ -140,126 +126,107 @@ canvas{margin-top:20px}
 <label>Closing Costs</label>
 <input id="close" value="8000">
 
-<label>Currency</label>
-<select id="cur">
-  <option value="$">$ USD</option>
-  <option value="€">€ EUR</option>
-  <option value="£">£ GBP</option>
-</select>
-
-<button class="primary" onclick="calculate()">Compare Rent vs Buy</button>
-<button class="secondary" onclick="location.reload()">Clear</button>
-
+<button onclick="calculate()">Compare Rent vs Buy</button>
 </div>
 
-<!-- RESULTS -->
+<!-- OUTPUT -->
 <div class="card">
-
 <div class="results">
-  <div class="result-box"><b id="rRent">$0</b><div>Total Rent</div></div>
-  <div class="result-box"><b id="rBuy">$0</b><div>Total Buy</div></div>
-  <div class="result-box"><b id="rDiff">$0</b><div>Difference</div></div>
-  <div class="result-box"><b id="rBE">–</b><div>Break-Even</div></div>
+<div class="stat"><b id="rentTotal">$0</b><br>Total Rent</div>
+<div class="stat"><b id="buyTotal">$0</b><br>Total Buy Cost</div>
+<div class="stat"><b id="diff">$0</b><br>Difference</div>
+<div class="stat"><b id="break">—</b><br>Break-Even</div>
 
-  <div class="result-box"><b id="rEq">$0</b><div>Equity</div></div>
-  <div class="result-box"><b id="rVal">$0</b><div>Home Value</div></div>
-  <div class="result-box"><b id="rNW">$0</b><div>Net Wealth</div></div>
-  <div class="result-box"><b id="rROI">0%</b><div>ROI</div></div>
+<div class="stat"><b id="equity">$0</b><br>Equity</div>
+<div class="stat"><b id="value">$0</b><br>Home Value</div>
+<div class="stat"><b id="wealth">$0</b><br>Net Wealth</div>
+<div class="stat"><b id="roi">0%</b><br>ROI</div>
 </div>
 
-<canvas id="chart" height="260"></canvas>
-
+<canvas id="chart"></canvas>
 </div>
+
 </div>
 </div>
 
 <script>
 let chart;
 
+function fmt(n){
+  return "$" + Math.round(n).toLocaleString();
+}
+
 function calculate(){
-const $ = id => +document.getElementById(id).value;
-const cur = document.getElementById("cur").value;
+  const rent = +rent.value;
+  const rentInc = +rentInc.value/100;
+  const years = +years.value;
 
-const rent0 = $("rent");
-const rentInc = $("rentInc")/100;
-const years = $("years");
+  const price = +price.value;
+  const down = +down.value;
+  const rate = +rate.value/100/12;
+  const term = +term.value*12;
+  const tax = +tax.value;
+  const ins = +ins.value;
+  const maint = +maint.value/100;
+  const app = +app.value/100;
+  const close = +close.value;
 
-const price = $("price");
-const down = $("down");
-const rate = $("rate")/100;
-const term = $("term")*12;
-const tax = $("tax");
-const ins = $("ins");
-const maint = $("maint")/100*price;
-const app = $("app")/100;
-const close = $("close");
+  let rentTotal = 0;
+  let rentYear = rent;
 
-let rentTotal=0;
-let rentYear=rent0;
-let rentArr=[], buyArr=[];
+  let rentArr=[], buyArr=[], labels=[];
+  let loan = price - down;
+  let value = price;
 
-// Calculate total rent over years
-for(let y=1;y<=years;y++){
-  rentTotal+=rentYear*12;
-  rentArr.push(rentTotal);
-  rentYear*=1+rentInc;
-}
+  const mPay = loan * rate / (1 - Math.pow(1+rate,-term));
+  let buyCash = down + close;
+  let principalPaid = 0;
 
-// Calculate mortgage payment
-const loan = price-down;
-const monthlyRate = rate/12;
-const mPay = loan * (monthlyRate * Math.pow(1+monthlyRate,term)) / (Math.pow(1+monthlyRate,term)-1);
+  for(let y=1;y<=years;y++){
+    rentTotal += rentYear*12;
+    rentArr.push(rentTotal);
+    rentYear *= (1+rentInc);
 
-// Simulate mortgage payments
-let balance=loan;
-let buyTotal=down + close; // Include closing costs upfront
-let principalPaid=0;
+    let yearlyMortgage = mPay*12;
+    let interest = loan*rate*12;
+    let principal = yearlyMortgage - interest;
+    loan -= principal;
+    principalPaid += principal;
 
-for(let m=1;m<=years*12;m++){
-  const interest=balance*monthlyRate;
-  const principal=mPay-interest;
-  balance-=principal;
-  if(balance<0) balance=0;
-  principalPaid+=principal;
-  buyTotal+=mPay;
-  if(m%12===0){
-    buyTotal+=tax+ins+maint;
-    buyArr.push(buyTotal);
+    let yearlyBuy = yearlyMortgage + tax + ins + price*maint;
+    buyCash += yearlyBuy;
+
+    value *= (1+app);
+    buyArr.push(buyCash);
+    labels.push("Year "+y);
   }
-}
 
-// Final calculations
-const homeValue = price*Math.pow(1+app,years);
-const equity = Math.max(0, homeValue-balance);
-const netWealth = equity - (buyTotal - down); // Total costs minus down payment (already in equity)
-const roi = down > 0 ? ((equity - down)/down)*100 : 0;
+  const equity = value - loan;
+  const netWealth = equity - (buyCash - down);
+  const roi = (netWealth / buyCash) * 100;
 
-document.getElementById("rRent").innerText=cur+rentTotal.toLocaleString();
-document.getElementById("rBuy").innerText=cur+buyTotal.toLocaleString();
-document.getElementById("rDiff").innerText=cur+(rentTotal-buyTotal).toLocaleString();
-document.getElementById("rEq").innerText=cur+equity.toLocaleString();
-document.getElementById("rVal").innerText=cur+homeValue.toLocaleString();
-document.getElementById("rNW").innerText=cur+netWealth.toLocaleString();
-document.getElementById("rROI").innerText=roi.toFixed(1)+"%";
-document.getElementById("rBE").innerText=rentTotal>buyTotal?"Year "+years:"Never";
+  rentTotalEl.innerText = fmt(rentTotal);
+  buyTotal.innerText = fmt(buyCash);
+  diff.innerText = fmt(rentTotal - buyCash);
+  equityEl.innerText = fmt(equity);
+  valueEl.innerText = fmt(value);
+  wealthEl.innerText = fmt(netWealth);
+  roiEl.innerText = roi.toFixed(1)+"%";
+  breakEl.innerText = "Never";
 
-if(chart) chart.destroy();
-chart=new Chart(document.getElementById("chart"),{
-  type:"line",
-  data:{
-    labels:[...Array(years)].map((_,i)=>"Year "+(i+1)),
-    datasets:[
-      {label:"Rent Cost",data:rentArr,borderColor:"#dc2626",fill:false},
-      {label:"Buy Cost",data:buyArr,borderColor:"#2563eb",fill:false}
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false
-  }
-});
+  if(chart) chart.destroy();
+  chart = new Chart(chartCtx,{
+    type:"line",
+    data:{
+      labels,
+      datasets:[
+        {label:"Rent Cost",data:rentArr,borderColor:"#dc2626"},
+        {label:"Buy Cost",data:buyArr,borderColor:"#2563eb"}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false}
+  });
 }
 </script>
-
 </body>
 </html>
