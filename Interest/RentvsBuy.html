@@ -186,7 +186,7 @@ const years = $("years");
 
 const price = $("price");
 const down = $("down");
-const rate = $("rate")/100/12;
+const rate = $("rate")/100;
 const term = $("term")*12;
 const tax = $("tax");
 const ins = $("ins");
@@ -198,23 +198,28 @@ let rentTotal=0;
 let rentYear=rent0;
 let rentArr=[], buyArr=[];
 
+// Calculate total rent over years
 for(let y=1;y<=years;y++){
   rentTotal+=rentYear*12;
   rentArr.push(rentTotal);
   rentYear*=1+rentInc;
 }
 
+// Calculate mortgage payment
 const loan = price-down;
-const mPay = loan*(rate*Math.pow(1+rate,term))/(Math.pow(1+rate,term)-1);
+const monthlyRate = rate/12;
+const mPay = loan * (monthlyRate * Math.pow(1+monthlyRate,term)) / (Math.pow(1+monthlyRate,term)-1);
 
+// Simulate mortgage payments
 let balance=loan;
-let buyTotal=down+close;
+let buyTotal=down + close; // Include closing costs upfront
 let principalPaid=0;
 
 for(let m=1;m<=years*12;m++){
-  const interest=balance*rate;
+  const interest=balance*monthlyRate;
   const principal=mPay-interest;
   balance-=principal;
+  if(balance<0) balance=0;
   principalPaid+=principal;
   buyTotal+=mPay;
   if(m%12===0){
@@ -223,17 +228,18 @@ for(let m=1;m<=years*12;m++){
   }
 }
 
+// Final calculations
 const homeValue = price*Math.pow(1+app,years);
-const equity = homeValue-balance;
-const netWealth = equity-buyTotal;
-const roi = ((equity-down)/down)*100;
+const equity = Math.max(0, homeValue-balance);
+const netWealth = equity - (buyTotal - down); // Total costs minus down payment (already in equity)
+const roi = down > 0 ? ((equity - down)/down)*100 : 0;
 
-document.getElementById("rRent").innerText=cur+rentTotal.toFixed(0);
-document.getElementById("rBuy").innerText=cur+buyTotal.toFixed(0);
-document.getElementById("rDiff").innerText=cur+(rentTotal-buyTotal).toFixed(0);
-document.getElementById("rEq").innerText=cur+equity.toFixed(0);
-document.getElementById("rVal").innerText=cur+homeValue.toFixed(0);
-document.getElementById("rNW").innerText=cur+netWealth.toFixed(0);
+document.getElementById("rRent").innerText=cur+rentTotal.toLocaleString();
+document.getElementById("rBuy").innerText=cur+buyTotal.toLocaleString();
+document.getElementById("rDiff").innerText=cur+(rentTotal-buyTotal).toLocaleString();
+document.getElementById("rEq").innerText=cur+equity.toLocaleString();
+document.getElementById("rVal").innerText=cur+homeValue.toLocaleString();
+document.getElementById("rNW").innerText=cur+netWealth.toLocaleString();
 document.getElementById("rROI").innerText=roi.toFixed(1)+"%";
 document.getElementById("rBE").innerText=rentTotal>buyTotal?"Year "+years:"Never";
 
@@ -246,6 +252,10 @@ chart=new Chart(document.getElementById("chart"),{
       {label:"Rent Cost",data:rentArr,borderColor:"#dc2626",fill:false},
       {label:"Buy Cost",data:buyArr,borderColor:"#2563eb",fill:false}
     ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false
   }
 });
 }
