@@ -61,7 +61,7 @@ label{
   margin-bottom:6px;
   display:block;
 }
-input{
+input, select{
   width:100%;
   padding:12px;
   border-radius:10px;
@@ -94,9 +94,7 @@ button{
 .result-box b{font-size:20px;display:block}
 .result-box small{color:var(--muted);font-size:12px}
 
-.chart-wrap{
-  height:400px;
-}
+.chart-wrap{height:300px}
 
 @media(max-width:900px){
   .grid{grid-template-columns:1fr}
@@ -114,14 +112,24 @@ button{
 
 <!-- INPUT -->
 <div class="card">
+
+<div class="section">
+<h3>Settings</h3>
+<label>Currency</label>
+<select id="currency">
+  <option value="$">$ USD</option>
+  <option value="€">€ EUR</option>
+  <option value="£">£ GBP</option>
+  <option value="₹">₹ INR</option>
+</select>
+</div>
+
 <div class="section">
 <h3>Rent</h3>
 <label>Monthly Rent</label>
 <input id="rent" value="1800">
 <label>Rent Increase %</label>
 <input id="rentInc" value="3">
-<label>Investment Return %</label>
-<input id="rentInvest" value="5">
 </div>
 
 <div class="section">
@@ -180,7 +188,8 @@ button{
 <script>
 let chart;
 const $=id=>+document.getElementById(id).value||0;
-const money=n=>"$"+Math.round(n).toLocaleString();
+const currencySymbol=()=>document.getElementById("currency").value;
+const money=n=>currencySymbol()+Math.round(n).toLocaleString();
 
 function calculate(){
 let rent=$("rent"), rentInc=$("rentInc")/100;
@@ -214,13 +223,13 @@ for(let y=1;y<=years;y++){
 let homeValue=price*Math.pow(1+app,years);
 let equity=homeValue-balance;
 
-document.getElementById("rRent").textContent=money(rentTotal);
-document.getElementById("rBuy").textContent=money(buyTotal);
-document.getElementById("rDiff").textContent=money(rentTotal-buyTotal);
-document.getElementById("rEq").textContent=money(equity);
+rRent.textContent=money(rentTotal);
+rBuy.textContent=money(buyTotal);
+rDiff.textContent=money(rentTotal-buyTotal);
+rEq.textContent=money(equity);
 
 if(chart) chart.destroy();
-chart=new Chart(document.getElementById("chart"),{
+chart=new Chart(chartCanvas,{
  type:"line",
  data:{
   labels:rentData.map((_,i)=>"Year "+(i+1)),
@@ -228,9 +237,19 @@ chart=new Chart(document.getElementById("chart"),{
    {label:"Rent Cost",data:rentData,borderColor:"#ef4444",tension:.35},
    {label:"Buy Cost",data:buyData,borderColor:"#3b82f6",tension:.35}
   ]
+ },
+ options:{
+  responsive:true,
+  maintainAspectRatio:false,
+  scales:{
+   y:{ticks:{callback:v=>currencySymbol()+v.toLocaleString()}}
+  }
  }
 });
 }
+
+const chartCanvas=document.getElementById("chart");
+document.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",calculate));
 calculate();
 </script>
 </body>
